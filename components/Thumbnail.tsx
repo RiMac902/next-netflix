@@ -3,10 +3,10 @@ import {Movie} from "../typings";
 import Image from "next/image";
 import {useRecoilState} from "recoil";
 import {modalState, movieState} from "../atoms/modalAtoms";
+import {DocumentData} from "firebase/firestore";
 
 interface Props {
-    movie: Movie
-    // movie: Movie | DocumentData
+    movie: Movie | DocumentData
 }
 
 const Thumbnail: FC<Props> = ({movie}) => {

@@ -14,7 +14,6 @@ interface Inputs {
 const Login: NextPage = () => {
     const [login, setLogin] = useState(false)
     const { signIn, signUp } = useAuth()
-
     const {register, handleSubmit, watch, formState: { errors }} = useForm<Inputs>()
 
     const onSubmit: SubmitHandler<Inputs> = async ({email, password}) => {
@@ -27,7 +26,6 @@ const Login: NextPage = () => {
     }
 
 
-
     return (
         <div className={'relative flex h-screen w-screen flex-col bg-black md:items-center md:justify-center md:bg-transparent'}>
             <Head>
@@ -36,12 +34,12 @@ const Login: NextPage = () => {
             </Head>
             <Image  src="https://rb.gy/p2hphi"
                     layout="fill"
-                    className="-z-10 !hidden opacity-60 sm:!inline"
+                    className={'-z-10 !hidden opacity-60 sm:!inline'}
                     objectFit="cover"
                     alt={''}/>
             <img
                 src="https://rb.gy/ulxxee"
-                className="absolute left-4 top-4 cursor-pointer object-contain md:left-10 md:top-6"
+                className={'absolute left-4 top-4 cursor-pointer object-contain md:left-10 md:top-6'}
                 width={150}
                 height={150}
             />
@@ -52,7 +50,7 @@ const Login: NextPage = () => {
                     <label className={'inline-block w-full'}>
                         <input type="email" placeholder={'Email'} className={'input'} {...register('email', {required: true})}/>
                         {errors.email && (
-                            <p className="p-1 text-[13px] font-light  text-orange-500">
+                            <p className={'p-1 text-[13px] font-light  text-orange-500'}>
                                 Please enter a valid email.
                             </p>
                         )}
@@ -60,7 +58,7 @@ const Login: NextPage = () => {
                     <label className={'inline-block w-full'}>
                         <input type="password" placeholder={'Password'} className={'input'} {...register('password', {required: true})}/>
                         {errors.password && (
-                            <p className="p-1 text-[13px] font-light  text-orange-500">
+                            <p className={'p-1 text-[13px] font-light  text-orange-500'}>
                                 Your password must contain between 4 and 60 characters.
                             </p>
                         )}

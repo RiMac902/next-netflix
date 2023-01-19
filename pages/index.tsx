@@ -7,9 +7,13 @@ import {Movie} from "../typings";
 import Row from "../components/Row";
 import useAuth from "../hooks/useAuth";
 import Modal from "../components/Modal";
-import {modalState} from "../atoms/modalAtoms";
+import {modalState, movieState} from "../atoms/modalAtoms";
 import {useRecoilValue} from "recoil";
-
+import Plans from "../components/Plans";
+import {getProducts, Product} from "@stripe/firestore-stripe-payments";
+import payments from "../lib/stripe";
+import useSubscription from "../hooks/useSubscription";
+import useList from "../hooks/useList";
 
 interface Props {
     netflixOriginals: Movie[]
@@ -20,18 +24,38 @@ interface Props {
     horrorMovies: Movie[]
     romanceMovies: Movie[]
     documentaries: Movie[]
+    products: Product[]
 }
 
-const Home = ({netflixOriginals, trendingNow, topRated, actionMovies, comedyMovies, horrorMovies, romanceMovies, documentaries}: Props) => {
-    const { logout, loading } = useAuth()
+const Home = ({
+                  netflixOriginals,
+                  trendingNow,
+                  topRated,
+                  actionMovies,
+                  comedyMovies,
+                  horrorMovies,
+                  romanceMovies,
+                  documentaries,
+                  products
+              }: Props) => {
+    const {user, loading} = useAuth()
     const showModal = useRecoilValue(modalState)
+    const subscription = useSubscription(user)
+    const movie = useRecoilValue(movieState)
+    const list = useList(user?.uid)
 
-    if (loading) return `Loading`
+
+    if (loading || subscription === null) return `Loading`
+
+    if (!subscription) return <Plans products={products}/>
+
     console.log(netflixOriginals)
     return (
         <div className={'relative h-screen bg-gradient-to-b lg:h-[140vh]'}>
             <Head>
-                <title>Home - Netflix</title>
+                <title>
+                    {movie?.title || movie?.original_name || 'Home'} - Netflix
+                </title>
                 <link rel="icon" href="/favicon.ico"/>
             </Head>
 
@@ -39,14 +63,14 @@ const Home = ({netflixOriginals, trendingNow, topRated, actionMovies, comedyMovi
             <main className={'relative pl-4 pb-24 lg:space-y-24 lg:pl-16'}>
                 <Banner netflixOriginals={netflixOriginals}/>
                 <section className="md:space-y-24">
-                    <Row title="Trending Now" movies={trendingNow} />
-                    <Row title="Top Rated" movies={topRated} />
-                    <Row title="Action Thrillers" movies={actionMovies} />
-                    {/* My List */}
-                    <Row title="Comedies" movies={comedyMovies} />
-                    <Row title="Scary Movies" movies={horrorMovies} />
-                    <Row title="Romance Movies" movies={romanceMovies} />
-                    <Row title="Documentaries" movies={documentaries} />
+                    <Row title="Trending Now" movies={trendingNow}/>
+                    <Row title="Top Rated" movies={topRated}/>
+                    <Row title="Action Thrillers" movies={actionMovies}/>
+                    {list.length > 0 && <Row title="My List" movies={list} />}
+                    <Row title="Comedies" movies={comedyMovies}/>
+                    <Row title="Scary Movies" movies={horrorMovies}/>
+                    <Row title="Romance Movies" movies={romanceMovies}/>
+                    <Row title="Documentaries" movies={documentaries}/>
                 </section>
             </main>
             {showModal && <Modal/>}
@@ -57,6 +81,11 @@ const Home = ({netflixOriginals, trendingNow, topRated, actionMovies, comedyMovi
 export default Home
 
 export const getServerSideProps: GetServerSideProps = async () => {
+    const products = await getProducts(payments, {
+        includePrices: true,
+        activeOnly: true,
+    }).then((res) => res).catch(error => console.log(error.message))
+
     const [
         netflixOriginals,
         trendingNow,
@@ -87,6 +116,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
             horrorMovies: horrorMovies.results,
             romanceMovies: romanceMovies.results,
             documentaries: documentaries.results,
+            products,
         }
     }
 }
